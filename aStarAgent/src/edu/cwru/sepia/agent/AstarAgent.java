@@ -233,6 +233,11 @@ public class AstarAgent extends Agent {
 	 */
 	private boolean shouldReplanPath(State.StateView state,
 			History.HistoryView history, Stack<MapLocation> currentPath) {
+		for(MapLocation m: currentPath){
+			if(state.isUnitAt(m.x, m.y) && currentPath.search(m) <= 3){
+				return true;
+			}
+		}
 		return false;
 	}
 
