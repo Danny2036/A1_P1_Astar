@@ -233,7 +233,9 @@ public class AstarAgent extends Agent {
 	 */
 	private boolean shouldReplanPath(State.StateView state,
 			History.HistoryView history, Stack<MapLocation> currentPath) {
+		//Check that each position isn't blocked
 		for(MapLocation m: currentPath){
+			//If the position is blocked and the position is 3 or less positions away replan
 			if(state.isUnitAt(m.x, m.y) && currentPath.search(m) <= 3){
 				return true;
 			}
