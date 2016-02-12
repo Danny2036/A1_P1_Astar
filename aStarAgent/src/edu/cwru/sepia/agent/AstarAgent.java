@@ -351,6 +351,7 @@ public class AstarAgent extends Agent {
 			}
 		}
 		System.out.println("I can't find another path...");
+		System.exit(0);
 		return new Stack<MapLocation>();
 	}
 
