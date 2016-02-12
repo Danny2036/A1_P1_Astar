@@ -330,7 +330,7 @@ public class AstarAgent extends Agent {
 		HashSet<MapLocation> visitedLocations = new HashSet<>();
 		PriorityQueue<MapLocation> unVisistedLocation = new PriorityQueue<MapLocation>();
 
-		unVisistedLocation.add(new MapLocation(start.x, start.y, start.cameFrom, 0, chebyShev(start, goal), 0));
+		unVisistedLocation.add(start);
 		MapLocation currentLocation;
 
 		while(!unVisistedLocation.isEmpty()){
@@ -404,14 +404,8 @@ public class AstarAgent extends Agent {
 
 	private Stack<MapLocation> getFullPath(MapLocation start,
 			MapLocation currentLocation) {
-		Stack<MapLocation> fullPath = new Stack<MapLocation>();
-		fullPath.push(currentLocation);
-		MapLocation currentSpot = currentLocation;
-		while(!start.equals(currentSpot)){
-			fullPath.push(currentSpot);
-			currentSpot = currentSpot.cameFrom;
-		}
-		return fullPath;
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 	private Set<MapLocation> getNextLocations(HashSet<MapLocation> visitedLocations, MapLocation currentLocation,

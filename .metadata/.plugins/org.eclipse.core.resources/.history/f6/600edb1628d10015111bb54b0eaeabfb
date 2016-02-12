@@ -408,10 +408,9 @@ public class AstarAgent extends Agent {
 		fullPath.push(currentLocation);
 		MapLocation currentSpot = currentLocation;
 		while(!start.equals(currentSpot)){
-			fullPath.push(currentSpot);
-			currentSpot = currentSpot.cameFrom;
+			
 		}
-		return fullPath;
+		return null;
 	}
 
 	private Set<MapLocation> getNextLocations(HashSet<MapLocation> visitedLocations, MapLocation currentLocation,
