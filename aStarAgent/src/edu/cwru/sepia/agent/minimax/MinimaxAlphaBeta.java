@@ -7,8 +7,7 @@ import edu.cwru.sepia.environment.model.state.State;
 
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class MinimaxAlphaBeta extends Agent {
 
@@ -37,7 +36,8 @@ public class MinimaxAlphaBeta extends Agent {
         GameStateChild bestChild = alphaBetaSearch(new GameStateChild(newstate),
                 numPlys,
                 Double.NEGATIVE_INFINITY,
-                Double.POSITIVE_INFINITY);
+                Double.POSITIVE_INFINITY,
+                true);
 
         return bestChild.action;
     }
@@ -72,8 +72,51 @@ public class MinimaxAlphaBeta extends Agent {
      * @param beta The current best value for the minimizing node from this node to the root
      * @return The best child of this node with updated values
      */
-    public GameStateChild alphaBetaSearch(GameStateChild node, int depth, double alpha, double beta)
+    public GameStateChild alphaBetaSearch(GameStateChild node, int depth, double alpha, double beta, boolean isMax)
     {
+    	//A-B Pruning pseudocode https://en.wikipedia.org/wiki/Alpha%E2%80%93beta_pruning#Pseudocode
+    	//Base case
+    	if (depth == 0){		
+    		return node; // return best state
+    	}
+    	
+    	//Get children in optimal expansion order
+    	List<GameStateChild> children = orderChildrenWithHeuristics(node.state.getChildren());
+    	
+    	//If we want to maximize
+    	if (isMax){
+    		double v = Double.NEGATIVE_INFINITY;
+    		for (GameStateChild child : children){
+	    		GameStateChild tempNode = alphaBetaSearch(child, depth - 1, alpha, beta, false);
+	    		double tempUtil = tempNode.state.getUtility();
+	    		v = Math.max(v, tempUtil);	    		
+	    		
+		    	// Set node to child with v utility
+	    		if (v == tempUtil){
+	    			node = tempNode;
+	    		}
+	    		alpha = Math.max(alpha, v);
+	    		
+	    		if (beta <= alpha){ break;	/* Beta cutoff */ }
+	    	}	    
+	    } 
+    	//If we want to minimize
+    	else{	
+	    	double v = Double.POSITIVE_INFINITY;	
+	    	for (GameStateChild child : children){	
+	    		GameStateChild tempNode = alphaBetaSearch(child, depth - 1, alpha, beta, true);
+	    		double tempUtil = tempNode.state.getUtility();	    		
+	    		v = Math.min(v, tempUtil);	    			    			    	
+	    		
+		    	// Set node to child with v utility
+	    		if (v == tempUtil){	    			
+	    			node = tempNode;
+	    		}
+	    		beta = Math.min(beta, v);
+	    		
+	    		if (beta <= alpha){ break;	/* Alpha cutoff */ }
+	    	}
+	    } 
         return node;
     }
 
@@ -92,6 +135,22 @@ public class MinimaxAlphaBeta extends Agent {
      */
     public List<GameStateChild> orderChildrenWithHeuristics(List<GameStateChild> children)
     {
-        return children;
+    	PriorityQueue<GameStateChild> retList = new PriorityQueue<GameStateChild>(children.size(), new GameStateComparator());
+    	retList.addAll(children);
+    	return new ArrayList<GameStateChild>(retList);
     }
+}
+
+class GameStateComparator implements Comparator<GameStateChild>{
+
+	@Override
+	public int compare(GameStateChild arg0, GameStateChild arg1) {
+		if(arg0.state.getUtility() > arg1.state.getUtility()){
+			return 1;
+		} else if(arg0.state.getUtility() < arg1.state.getUtility()){
+			return -1;
+		} else{
+			return 0;
+		}
+	}
 }
