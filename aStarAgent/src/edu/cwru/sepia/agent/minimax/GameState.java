@@ -5,7 +5,9 @@ import edu.cwru.sepia.action.ActionType;
 import edu.cwru.sepia.action.DirectedAction;
 import edu.cwru.sepia.action.TargetedAction;
 import edu.cwru.sepia.environment.model.state.State;
+import edu.cwru.sepia.environment.model.state.State.StateView;
 import edu.cwru.sepia.environment.model.state.Unit;
+import edu.cwru.sepia.environment.model.state.Unit.UnitView;
 import edu.cwru.sepia.util.Direction;
 
 import java.util.*;
@@ -19,6 +21,15 @@ import java.util.*;
  * but do not delete or change the signatures of the provided methods.
  */
 public class GameState {
+	private final int xExtent;	// The x dimension of the board
+	private final int yExtent;	// The y dimension of the board
+	private final List<Integer> resourceIds;	// The list of resource IDs in the game
+	private StateView parentState;	// The state view from which this game state was created
+	private List<Integer> footmanUnitIds;	// The ids of all footmen in the game
+	private List<Integer> archerUnitIds;	// The ids of all archers in the game
+	private List<UnitView> units;	// The list of all units in the game
+	
+	private Map<UnitView, FootmanPosition> footmanPositions = new HashMap<UnitView, FootmanPosition>();	// Map locations to footmen
 
     /**
      * You will implement this constructor. It will
@@ -42,6 +53,27 @@ public class GameState {
      * @param state Current state of the episode
      */
     public GameState(State.StateView state) {
+    	this.xExtent = state.getXExtent();
+    	this.yExtent = state.getYExtent();
+    	this.resourceIds = state.getAllResourceIds();
+    	this.units = state.getAllUnits();
+    	this.parentState = state;
+
+    	// Find all of the active units in this state
+    	footmanUnitIds = new ArrayList<Integer>();
+    	archerUnitIds = new ArrayList<Integer>();
+    	
+    	// Find all of the units in the game and add them to the appropriate list.
+    	for (UnitView unit : this.units){
+    		String unitTypeName = unit.getTemplateView().getName();
+    		
+    		if (unitTypeName.equals("Footman")){
+    			footmanUnitIds.add(unit.getID());
+    			footmanPositions.put(unit, new FootmanPosition(unit.getXPosition(), unit.getYPosition()));    		
+    		}else if (unitTypeName.equals("Archer")){
+    			archerUnitIds.add(unit.getID());
+    		}    		
+    	}   	
     }
 
     /**
@@ -82,7 +114,59 @@ public class GameState {
      *
      * @return All possible actions and their associated resulting game state
      */
-    public List<GameStateChild> getChildren() {
-        return null;
+    public List<GameStateChild> getChildren(){
+		return null;
+    }
+    
+    /**
+     * Get the cardinal directions for footman movement
+     * @return an array of the cardinal directions
+     */
+    private Direction[] getCardinal(){
+    	Direction[] cardinalDirections = new Direction[4];
+    	cardinalDirections[0] = Direction.NORTH;
+    	cardinalDirections[1] = Direction.SOUTH;
+    	cardinalDirections[2] = Direction.EAST;
+    	cardinalDirections[3] = Direction.WEST;    
+    	
+    	return cardinalDirections;
+    }
+    
+    /**
+     * Check if the position after a potential move/attack is still on the board
+     * @param x
+     * @param y
+     * @return
+     */
+    private boolean inBounds(int x, int y){
+    	return !(x > this.xExtent || y > this.yExtent || x < 0 || y < 0);    	
+    }
+    
+    /**
+     * Check if there is an archer that the footman can attack given its coordinates
+     * @param x
+     * @param y
+     * @return
+     */
+    private Integer getArcherInRange(int x, int y){
+    	for (Integer archerID : archerUnitIds){
+    		UnitView archerUnit = this.parentState.getUnit(archerID);
+    		
+    		if (Math.abs(archerUnit.getXPosition() - x) <= 1 && Math.abs(archerUnit.getYPosition() - y) <= 1){
+    			// Can evaluate an attack state
+    			return archerID;
+    		}
+    	}
+    	return null;
+    }
+    
+    private class FootmanPosition{
+    	public int xPosition;
+    	public int yPosition;
+    	
+    	public FootmanPosition(int x, int y){
+    		this.xPosition = x;
+    		this.yPosition = y;
+    	}
     }
 }
