@@ -13,7 +13,7 @@ import java.util.*;
 
 public class AstarAgent extends Agent {
 
-	class MapLocation {
+	class MapLocation implements Comparable<MapLocation>{
 		//The x and y location of on the map
 		public int x, y;
 
@@ -48,6 +48,17 @@ public class AstarAgent extends Agent {
 		public MapLocation(int x, int y) {
 			this.x = x;
 			this.y = y;
+		}
+		
+		@Override
+		public int compareTo(MapLocation m){
+			if(fValue > m.fValue){
+				return 1;
+			} else if (fValue < m.fValue){
+				return -1;
+			} else{
+				return 0;
+			}
 		}
 	}
 
@@ -423,7 +434,7 @@ public class AstarAgent extends Agent {
 		for(int i = -1; i < 2; i++){
 			for(int j = -1; j < 2; j++){
 				MapLocation location = new MapLocation(i, j);
-				if(isValid(visitedLocations, currentLocation, location, enemyFootmanLoc, resourceLocations, xExtent, yExtent)){
+				if(isValid(visitedLocations, location, enemyFootmanLoc, currentLocation, resourceLocations, xExtent, yExtent)){
 					validLocations.add(location);
 				}
 			}
